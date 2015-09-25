@@ -1,0 +1,9 @@
+# OS X-specific files
+.DS_Store
+# Build folders
+[Bb]uild
+[Dd]ebug
+# NetBeans folders
+[Dd]ist
+nbproject
+

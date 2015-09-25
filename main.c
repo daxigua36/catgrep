@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 {
     int pipefd[2];
     pid_t chpid;
-    char* word = argv[2];
+    char * word = argv[2];
     
     if (argc < 2) 
     {
@@ -46,8 +46,9 @@ int main(int argc, char** argv)
     { //Child
         close(pipefd[1]);
         size_t buflen = 0;
-        while (read(pipefd[0], &buflen, sizeof(size_t)) > 0) {
-            char* buf = (char*)malloc(sizeof(char) * MAX_LENGTH);
+        while (read(pipefd[0], &buflen, sizeof(size_t)) > 0) 
+        {
+            char * buf = (char*)malloc(sizeof(char) * MAX_LENGTH);
             read(pipefd[0], buf, buflen);
             if (strstr(buf, word) != NULL)
             {
@@ -63,8 +64,8 @@ int main(int argc, char** argv)
     {          //Parent
         close(pipefd[0]);
         
-        FILE* fp;
-        char* line = NULL;
+        FILE * fp;
+        char * line = NULL;
         size_t len;
         ssize_t read;
         

@@ -14,14 +14,20 @@
 #include <signal.h>
 
 #define MAX_LENGTH 255
-/*
- * 
- */
-int main(int argc, char** argv) 
+
+int flag;
+
+void sig_handler(int signum) 
+{
+    flag = 0;
+}
+
+int main(int argc, char ** argv) 
 {
     int pipefd[2];
     pid_t chpid;
     char * word = argv[2];
+    flag = 1;
     
     if (argc < 2) 
     {
@@ -44,9 +50,9 @@ int main(int argc, char** argv)
     
     if (chpid == 0) 
     { //Child
-        close(pipefd[1]);
+        close(pipefd[1]);//Closing unused writing pipefd
         size_t buflen = 0;
-        while (read(pipefd[0], &buflen, sizeof(size_t)) > 0) 
+        while (read(pipefd[0], &buflen, sizeof(size_t)) > 0 && flag) 
         {
             char * buf = (char*)malloc(sizeof(char) * MAX_LENGTH);
             read(pipefd[0], buf, buflen);
@@ -57,12 +63,10 @@ int main(int argc, char** argv)
         }
             
         close(pipefd[0]);
-        return EXIT_SUCCESS;
-
     } 
     else 
     {          //Parent
-        close(pipefd[0]);
+        close(pipefd[0]);//Closing unused reading pipefd
         
         FILE * fp;
         char * line = NULL;
@@ -79,19 +83,15 @@ int main(int argc, char** argv)
         while ((read = getline(&line, &len, fp)) != -1) 
         {
             size_t lenlen = strlen(line);
-            write(pipefd[1], &lenlen, sizeof(size_t));
-            write(pipefd[1], line, lenlen);
+            write(pipefd[1], &lenlen, sizeof(size_t));//Writing length to pipe
+            write(pipefd[1], line, lenlen); //Writing string to pipe
         }
         
-        //kill(chpid, SIGKILL);
+        kill(chpid, SIGUSR1); //Sending SIGUSR1 to child process
         fclose(fp);
         close(pipefd[1]);
         wait(NULL);
-        
-        
-        return EXIT_SUCCESS;
-    }
-
+    }    
     return EXIT_SUCCESS;
 }
 

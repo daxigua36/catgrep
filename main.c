@@ -14,6 +14,7 @@
 #include <signal.h>
 
 #define MAX_LENGTH 255
+#define TRUE 1
 
 int flag;
 
@@ -27,7 +28,6 @@ int main(int argc, char ** argv)
     int pipefd[2];
     pid_t chpid;
     char * word = argv[2];
-    flag = 1;
     
     if (argc < 2) 
     {
@@ -50,10 +50,16 @@ int main(int argc, char ** argv)
     
     if (chpid == 0) 
     { //Child
+        flag = 1;
+        signal(SIGUSR1, sig_handler);
         close(pipefd[1]);//Closing unused writing pipefd
-        size_t buflen = 0;
-        while (read(pipefd[0], &buflen, sizeof(size_t)) > 0 && flag) 
+        size_t buflen = 0;\
+        while (TRUE) 
         {
+            if (!flag && read(pipefd[0], &buflen, sizeof(size_t)) == 0)
+            {
+                break;
+            }
             char * buf = (char*)malloc(sizeof(char) * MAX_LENGTH);
             read(pipefd[0], buf, buflen);
             if (strstr(buf, word) != NULL)
